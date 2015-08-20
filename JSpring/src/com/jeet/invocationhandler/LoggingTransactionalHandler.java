@@ -23,9 +23,9 @@ public class LoggingTransactionalHandler implements InvocationHandler {
 		if( AnnotationUtil.containAnnotation(actualObj, Loggable.class)){
 			Loggable loggable = (Loggable)actualObj.getAnnotation(Loggable.class);
 			String methodName = actualObj.getName();
-			System.out.println("Before method execution : "+methodName+" Message : "+ loggable.message());
+			System.out.println("Before method execution : "+methodName+" Message : "+ loggable.before());
 			retVal = method.invoke(proxyObj, args);
-			System.out.println("Method execution completed, method name is : "+methodName);
+			System.out.println("Method execution completed, method name is : "+methodName+" Message : "+ loggable.after());
 		}else{
 			retVal = method.invoke(proxyObj, args);
 		}

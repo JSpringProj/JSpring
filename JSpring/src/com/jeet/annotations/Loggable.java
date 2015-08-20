@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Loggable {
 	
-	public String message() default "";
-
+	public String before() default "";
+	public String after() default "";
 }
