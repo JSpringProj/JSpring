@@ -32,7 +32,9 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 			holder.init();
 			transactionId = holder.getMainTransactionId();
 			try {
-				dataSource.getConnection().setAutoCommit(false);
+				getConnection();
+				Connection connection = (Connection)holder.getValue(TransactionHolder.ACTUAL_CONNECTION);
+				connection.setAutoCommit(false);
 			} catch (SQLException e) {
 			}
 		} else {
@@ -53,7 +55,7 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 				connection.commit();
 				connection.close();
 				disposeHolder();
-				Logger.log(this, "commit", " Commited with id : "+transactionId);
+				Logger.log(this, "commit", " Commited with id : "+transactionId+". Closing the connection");
 			} catch (SQLException e) {
 			}
 		} else {
@@ -73,7 +75,7 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 				connection.rollback();
 				connection.close();
 				disposeHolder();
-				Logger.log(this, "rollback", " Rollbacked with id : "+transactionId);
+				Logger.log(this, "rollback", " Rollbacked with id : "+transactionId+". Closing the connection.");
 			} catch (SQLException e) {
 			}
 		} else {
@@ -95,6 +97,8 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 				con = getConnectionProxy(actualConnection);
 				holder.setValue(TransactionHolder.PROXY_CONNECTION, con);
 			} catch (SQLException e) {
+				System.out
+						.println("TransactionalRepositryImpl.getConnection() EXCEPTION------");
 			}
 
 		}

@@ -36,7 +36,6 @@ public class JAppContext {
 
 	public Object getBean(String beanId) {
 		ObjectWrapper objWrapper = beans.get(beanId);
-
 		return objWrapper == null ? objWrapper : objWrapper.wrappedObject;
 	}
 

@@ -18,8 +18,9 @@ public class ConnectionInvocationHandler implements InvocationHandler{
 			throws Throwable {
 		Object retVal = null;
 		 if( !method.getName().equalsIgnoreCase("close")){
-			 Logger.log(this, "invoke", "Can not close connection ");
 			 retVal = method.invoke(connection, args);
+		 }else{
+			 Logger.log(this, "invoke", "Can not close connection on method call "+method.getName()+"().");
 		 }
 		return retVal;
 	}
