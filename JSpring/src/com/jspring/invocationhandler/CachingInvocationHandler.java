@@ -3,6 +3,7 @@ package com.jspring.invocationhandler;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import com.jspring.annotations.CacheEvict;
 import com.jspring.annotations.Cacheable;
 import com.jspring.controller.JAppContext;
 import com.jspring.controller.JSpringApp;
@@ -22,17 +23,22 @@ public class CachingInvocationHandler implements InvocationHandler {
 
 	public Object invoke(Object proxy, Method method, Object[] args)
 			throws Throwable {
-
+		Method targetMethod = ReflectionUtil.getActualMethod(
+				actualObj.getClass(), method);
+		JAppContext appCon = JSpringApp.getAppContext();
+		CacheRepository repository = (CacheRepository) appCon
+				.getBean("CacheRepositoryImpl");
 		Object retVal;
 
-		Method m2 = ReflectionUtil
-				.getActualMethod(actualObj.getClass(), method);
-		if (AnnotationUtil.containAnnotation(m2, Cacheable.class)) {
-			String cacheRegion = m2.getAnnotation(Cacheable.class)
+		if (AnnotationUtil.containAnnotation(targetMethod, CacheEvict.class)) {
+			String cacheRegion = targetMethod.getAnnotation(Cacheable.class)
 					.cacheRegion();
-			JAppContext appCon = JSpringApp.getAppContext();
-			CacheRepository repository = (CacheRepository) appCon
-					.getBean("CacheRepositoryImpl");
+			repository.evictCache(cacheRegion);
+		}
+
+		if (AnnotationUtil.containAnnotation(targetMethod, Cacheable.class)) {
+			String cacheRegion = targetMethod.getAnnotation(Cacheable.class)
+					.cacheRegion();
 			String key = getkey(method, args);
 			retVal = repository.getCacheValue(cacheRegion, key);
 
