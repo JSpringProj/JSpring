@@ -41,7 +41,7 @@ public class AnnotationUtil {
 	public static List<Annotation> getAnnotations(Method target) {
 		return getlist(target.getAnnotations());
 	}
-	
+
 	public static List<Annotation> getAnnotations(Field[] target) {
 		List<Annotation> fieldAnnotations = new ArrayList<Annotation>();
 		for (Field field : target) {
@@ -94,7 +94,7 @@ public class AnnotationUtil {
 		}
 		return contains;
 	}
-	
+
 	public static boolean containAnnotation(Field target, Class annotationClass) {
 		boolean contains = false;
 		List<Annotation> anList = getAnnotations(target);
@@ -118,8 +118,9 @@ public class AnnotationUtil {
 		}
 		return contains;
 	}
-	
-	public static boolean containAllAnnotation(Class target, Class annotationClass) {
+
+	public static boolean containAllAnnotation(Class target,
+			Class annotationClass) {
 		boolean contains = false;
 		List<Annotation> anList = getAllAnnotation(target);
 		for (Annotation an : anList) {
@@ -131,4 +132,12 @@ public class AnnotationUtil {
 		return contains;
 	}
 
+	public static boolean containAllAnnotation(Class target,
+			Class[] annotationClasses) {
+		boolean contains = false;
+		for (Class clz : annotationClasses) {
+			contains = contains || containAllAnnotation(target, clz);
+		}
+		return contains;
+	}
 }

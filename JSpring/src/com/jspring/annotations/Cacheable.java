@@ -1,4 +1,4 @@
-package com.jeet.annotations;
+package com.jspring.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,7 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD})
-public @interface Transational {
+@Target(ElementType.METHOD)
+public @interface Cacheable {
 
+	String cacheRegion() default "default";
 }
