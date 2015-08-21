@@ -15,6 +15,7 @@ import com.jspring.repository.intf.TransactionalRepositry;
 public class TransactionalRepositryImpl implements TransactionalRepositry {
 
 	private final ThreadLocal<TransactionHolder> threadLocal;
+	
 	@Autowired
 	private DataSource dataSource;
 
@@ -26,7 +27,7 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 	public double startTransaction() {
 		double transactionId = 0;
 		TransactionHolder holder = getHolder();
-		if (((int) holder.getMainTransactionId()) == 0) {
+		if ( Double.compare(holder.getMainTransactionId(), 0.0) == 0) {
 			holder.init();
 			transactionId = holder.getMainTransactionId();
 			try {
@@ -44,16 +45,22 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 	public boolean commit(double transactionId) {
 		TransactionHolder holder = getHolder();
 		double mainTId = holder.getMainTransactionId();
-		if (mainTId == transactionId) {
+		System.out.println("TransactionalRepositryImpl.commit() before"+transactionId+ "   "+mainTId +"   "+Double.compare(mainTId ,transactionId));
+		if (Double.compare(mainTId ,transactionId) == 0) {
 			try {
 				Connection connection = (Connection) holder
 						.getValue(TransactionHolder.ACTUAL_CONNECTION);
+				System.out.println("TransactionalRepositryImpl.commit()"+transactionId+connection);
 				connection.commit();
+				System.out.println("TransactionalRepositryImpl.commit() 0-0-0-0-0-");
 				connection.close();
+				System.out.println("TransactionalRepositryImpl.commit() -------------");
 				disposeHolder();
+				
 			} catch (SQLException e) {
 			}
 		} else {
+			System.out.println("TransactionalRepositryImpl.commit() NOT EQ");
 			return holder.removeTranstaionId(transactionId);
 		}
 		return true;
@@ -63,13 +70,14 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 	public boolean rollback(double transactionId) {
 		TransactionHolder holder = getHolder();
 		double mainTId = holder.getMainTransactionId();
-		if (mainTId == transactionId) {
+		if (Double.compare(mainTId ,transactionId) == 0) {
 			try {
 				Connection connection = (Connection) holder
 						.getValue(TransactionHolder.ACTUAL_CONNECTION);
 				connection.rollback();
 				connection.close();
 				disposeHolder();
+				System.out.println("TransactionalRepositryImpl.rollback()"+transactionId);
 			} catch (SQLException e) {
 			}
 		} else {

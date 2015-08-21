@@ -11,7 +11,7 @@ public class TransactionHolder {
 	
 	public static final int PROXY_CONNECTION = 2;
 
-	private double mainTransactionId = 0;
+	private double mainTransactionId = 0.0;
 
 	private List<Double> transactionIds;
 

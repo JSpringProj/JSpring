@@ -25,7 +25,7 @@ public class TransactionalInvocationHandler implements InvocationHandler {
 		Method meth = ReflectionUtil.getActualMethod(actualObj.getClass(), method);
 		if( AnnotationUtil.containAnnotation(meth, Transational.class)){
 			JAppContext appCon = JSpringApp.getAppContext();
-			TransactionalRepositry rep = (TransactionalRepositry)appCon.getBean("TransactionalRepositryImpl");
+			TransactionalRepositry rep = (TransactionalRepositry)appCon.getBean("TransactionalRepositry");
 			double d = rep.startTransaction();
 			rep.getConnection();
 			System.out.println("TransactionalInvocationHandler.invoke()"+d);

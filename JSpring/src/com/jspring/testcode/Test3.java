@@ -1,7 +1,9 @@
 package com.jspring.testcode;
 
+import com.jspring.annotations.Component;
 
-//@Component
+
+@Component(name="t3")
 public class Test3 implements ITest {
 
 	@Override

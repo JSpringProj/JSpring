@@ -13,22 +13,21 @@ import com.jspring.util.AnnotationUtil;
 
 public class ProxyCreator {
 
-	public static Object getProxy(Class classs) {
+	public static Object getProxy(Object actualObj) {
 		Object retVal = null;
-		Object loggableProxy = getLoggableProxy(classs, null);
-		Object cachableProxy = getCachablelProxy(classs, loggableProxy);
-		Object transactionProxy = getTranstactionalProxy(classs, cachableProxy);
-		retVal = transactionProxy != null ? transactionProxy
-				: (cachableProxy != null ? cachableProxy : loggableProxy);
+		Object loggableProxy = getLoggableProxy(actualObj, actualObj);
+		Object cachableProxy = getCachablelProxy(actualObj, loggableProxy);
+		Object transactionProxy = getTranstactionalProxy(actualObj, cachableProxy);
+		retVal =  transactionProxy;
 		return retVal;
 	}
 
-	private static Object getTranstactionalProxy(Class classs, Object proxyObj) {
+	private static Object getTranstactionalProxy(Object actualObj, Object proxyObj) {
 		Object retVal;
-		if (AnnotationUtil.containAllAnnotation(classs, Transational.class)) {
-			Class[] interfaces = classs.getInterfaces();
-			Object actualObj = getInstance(classs);
-			retVal = Proxy.newProxyInstance(classs.getClassLoader(),
+		Class clz = actualObj.getClass();
+		if (AnnotationUtil.containAllAnnotation(clz, Transational.class)) {
+			Class[] interfaces = clz.getInterfaces();
+			retVal = Proxy.newProxyInstance(clz.getClassLoader(),
 					interfaces, new TransactionalInvocationHandler(actualObj,
 							(proxyObj != null ? proxyObj : actualObj)));
 			System.out.println("Transactional proxy created is : "
@@ -39,13 +38,13 @@ public class ProxyCreator {
 		return retVal;
 	}
 
-	private static Object getCachablelProxy(Class classs, Object proxyObj) {
+	private static Object getCachablelProxy(Object actualObj, Object proxyObj) {
 		Object retVal;
-		if (AnnotationUtil.containAllAnnotation(classs, new Class[] {
+		Class clz = actualObj.getClass();
+		if (AnnotationUtil.containAllAnnotation(clz, new Class[] {
 				Cacheable.class, CacheEvict.class })) {
-			Class[] interfaces = classs.getInterfaces();
-			Object actualObj = getInstance(classs);
-			retVal = Proxy.newProxyInstance(classs.getClassLoader(),
+			Class[] interfaces = clz.getInterfaces();
+			retVal = Proxy.newProxyInstance(clz.getClassLoader(),
 					interfaces, new CachingInvocationHandler(actualObj,
 							(proxyObj != null ? proxyObj : actualObj)));
 			System.out.println("Cachable proxy created is : "
@@ -56,12 +55,12 @@ public class ProxyCreator {
 		return retVal;
 	}
 
-	private static Object getLoggableProxy(Class classs, Object proxyObj) {
+	private static Object getLoggableProxy(Object actualObj, Object proxyObj) {
 		Object retVal;
-		if (AnnotationUtil.containAllAnnotation(classs, Loggable.class)) {
-			Class[] interfaces = classs.getInterfaces();
-			Object actualObj = getInstance(classs);
-			retVal = Proxy.newProxyInstance(classs.getClassLoader(),
+		Class clz = actualObj.getClass();
+		if (AnnotationUtil.containAllAnnotation(clz, Loggable.class)) {
+			Class[] interfaces = clz.getInterfaces();
+			retVal = Proxy.newProxyInstance(clz.getClassLoader(),
 					interfaces, new LoggingTransactionalHandler(actualObj,
 							(proxyObj != null ? proxyObj : actualObj)));
 			System.out.println("Loggable proxy created is : "
@@ -70,14 +69,5 @@ public class ProxyCreator {
 			retVal = proxyObj;
 		}
 		return retVal;
-	}
-
-	private static Object getInstance(Class classs) {
-		try {
-			return Class.forName(classs.getName()).newInstance();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 }

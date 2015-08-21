@@ -75,7 +75,7 @@ public class AnnotationUtil {
 		boolean contains = false;
 		List<Annotation> anList = getAnnotations(target);
 		for (Annotation an : anList) {
-			if (an.annotationType().getName() == annotationClass.getName()) {
+			if (an.annotationType().getName().equals(annotationClass.getName())) {
 				contains = true;
 				break;
 			}
@@ -87,7 +87,7 @@ public class AnnotationUtil {
 		boolean contains = false;
 		List<Annotation> anList = getAnnotations(target);
 		for (Annotation an : anList) {
-			if (an.annotationType().getName() == annotationClass.getName()) {
+			if (an.annotationType().getName().equals(annotationClass.getName())) {
 				contains = true;
 				break;
 			}
@@ -99,7 +99,7 @@ public class AnnotationUtil {
 		boolean contains = false;
 		List<Annotation> anList = getAnnotations(target);
 		for (Annotation an : anList) {
-			if (an.annotationType().getName() == annotationClass.getName()) {
+			if (an.annotationType().getName().equals(annotationClass.getName())) {
 				contains = true;
 				break;
 			}
@@ -111,7 +111,7 @@ public class AnnotationUtil {
 		boolean contains = false;
 		List<Annotation> anList = getAnnotations(target);
 		for (Annotation an : anList) {
-			if (an.annotationType().getName() == annotationClass.getName()) {
+			if (an.annotationType().getName().equals(annotationClass.getName())) {
 				contains = true;
 				break;
 			}
@@ -124,7 +124,7 @@ public class AnnotationUtil {
 		boolean contains = false;
 		List<Annotation> anList = getAllAnnotation(target);
 		for (Annotation an : anList) {
-			if (an.annotationType().getName() == annotationClass.getName()) {
+			if (an.annotationType().getName().equals(annotationClass.getName())) {
 				contains = true;
 				break;
 			}
