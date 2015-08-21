@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 
 import com.jspring.annotations.Autowired;
 import com.jspring.annotations.Component;
-import com.jspring.annotations.PostConstruct;
 import com.jspring.invocationhandler.ConnectionInvocationHandler;
 import com.jspring.repository.intf.TransactionalRepositry;
 
@@ -19,50 +18,22 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 	@Autowired
 	private DataSource dataSource;
 
-	private Connection connection;
-
 	public TransactionalRepositryImpl() {
 		threadLocal = new ThreadLocal<TransactionHolder>();
-	}
-	
-	@PostConstruct
-	public void testPostCon(){
-		System.out.println("TransactionalRepositryImpl.testPostCon() --------------------");
-		try {
-			System.out
-					.println("TransactionalRepositryImpl.TransactionalRepositryImpl()------------dataSource: "+dataSource);
-			Connection con = dataSource.getConnection();
-			System.out
-					.println("TransactionalRepositryImpl.TransactionalRepositryImpl() con:  "+con);
-			connection = (Connection) Proxy
-					.newProxyInstance(
-							con.getClass().getClassLoader(),
-							con.getClass().getInterfaces(),
-							new ConnectionInvocationHandler(dataSource
-									.getConnection()));
-
-		} catch (Exception e) {
-			System.out
-					.println("TransactionalRepositryImpl.TransactionalRepositryImpl() EXP");
-		}
 	}
 
 	@Override
 	public double startTransaction() {
 		double transactionId = 0;
-		TransactionHolder holder = threadLocal.get();
-		System.out.println("TransactionalRepositryImpl.startTransaction()"
-				+ holder);
-		if (holder == null) {
-			holder = getHolder();
+		TransactionHolder holder = getHolder();
+		if (((int) holder.getMainTransactionId()) == 0) {
+			holder.init();
 			transactionId = holder.getMainTransactionId();
-			System.out
-					.println("TransactionalRepositryImpl.startTransaction() dataSource : "
-							+ dataSource);
-			/*
-			 * try { dataSource.getConnection().setAutoCommit(false); } catch
-			 * (SQLException e) { }
-			 */
+			try {
+				dataSource.getConnection().setAutoCommit(false);
+			} catch (SQLException e) {
+			}
+
 		} else {
 			transactionId = holder.getNextTransactionId();
 		}
@@ -72,17 +43,16 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 	@Override
 	public boolean commit(double transactionId) {
 		TransactionHolder holder = getHolder();
-		System.out.println("TransactionalRepositryImpl.commit() holder="
-				+ holder);
 		double mainTId = holder.getMainTransactionId();
-		System.out.println("TransactionalRepositryImpl.commit() mainTId="
-				+ mainTId);
 		if (mainTId == transactionId) {
-			// try {
-			// dataSource.getConnection().commit();
-			disposeHolder();
-			// } catch (SQLException e) {
-			// }
+			try {
+				Connection connection = (Connection) holder
+						.getValue(TransactionHolder.ACTUAL_CONNECTION);
+				connection.commit();
+				connection.close();
+				disposeHolder();
+			} catch (SQLException e) {
+			}
 		} else {
 			return holder.removeTranstaionId(transactionId);
 		}
@@ -95,7 +65,10 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 		double mainTId = holder.getMainTransactionId();
 		if (mainTId == transactionId) {
 			try {
-				dataSource.getConnection().rollback();
+				Connection connection = (Connection) holder
+						.getValue(TransactionHolder.ACTUAL_CONNECTION);
+				connection.rollback();
+				connection.close();
 				disposeHolder();
 			} catch (SQLException e) {
 			}
@@ -109,12 +82,29 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 	public Connection getConnection() {
 		TransactionHolder holder = getHolder();
 		Connection con = (Connection) holder
-				.getValue(TransactionHolder.CONNECTION);
+				.getValue(TransactionHolder.PROXY_CONNECTION);
 		if (con == null) {
-			holder.setValue(TransactionHolder.CONNECTION, connection);
-			con = connection;
+			try {
+				Connection actualConnection = dataSource.getConnection();
+				holder.setValue(TransactionHolder.ACTUAL_CONNECTION,
+						actualConnection);
+				con = getConnectionProxy(actualConnection);
+				holder.setValue(TransactionHolder.PROXY_CONNECTION, con);
+			} catch (SQLException e) {
+			}
+
 		}
-		System.out.println("TransactionalRepositryImpl.getConnection()" + con);
+		System.out
+				.println("********************8TransactionalRepositryImpl.getConnection()"
+						+ con);
+		return con;
+	}
+
+	private Connection getConnectionProxy(Connection actualConnection) {
+		Connection con = null;
+		con = (Connection) Proxy.newProxyInstance(actualConnection.getClass()
+				.getClassLoader(), new Class[] { Connection.class },
+				new ConnectionInvocationHandler(actualConnection));
 		return con;
 	}
 

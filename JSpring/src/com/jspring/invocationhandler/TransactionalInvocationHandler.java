@@ -28,6 +28,7 @@ public class TransactionalInvocationHandler implements InvocationHandler {
 			JAppContext appCon = JSpringApp.getAppContext();
 			TransactionalRepositry rep = (TransactionalRepositry)appCon.getBean("TransactionalRepositryImpl");
 			double d = rep.startTransaction();
+			rep.getConnection();
 			System.out.println("TransactionalInvocationHandler.invoke()"+d);
 			System.out.println(" Started Transaction");
 			retVal = method.invoke(proxyObj, args);
