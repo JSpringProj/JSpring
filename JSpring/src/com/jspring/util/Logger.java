@@ -17,9 +17,9 @@ public class Logger {
 	public static void log(String clzName, String methodName, String message) {
 
 		if (LOG_ON) {
-			String formattedClzName = "[ClassName] - " + clzName + ", ";
-			System.out.println("JLog : " + formattedClzName + " [MethodName] - "
-					+ methodName + ", [Msg] - " + message);
+			String formattedClzName = "[ClassName]- " + clzName + ", ";
+			System.out.println("JLog: " + formattedClzName + " [MethodName]- "
+					+ methodName + ",  [Msg]- " + message);
 		}
 
 	}

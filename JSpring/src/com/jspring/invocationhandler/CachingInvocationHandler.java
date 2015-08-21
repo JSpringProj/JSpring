@@ -9,6 +9,7 @@ import com.jspring.controller.JAppContext;
 import com.jspring.controller.JSpringApp;
 import com.jspring.repository.intf.CacheRepository;
 import com.jspring.util.AnnotationUtil;
+import com.jspring.util.Logger;
 import com.jspring.util.ReflectionUtil;
 
 public class CachingInvocationHandler implements InvocationHandler {
@@ -40,16 +41,14 @@ public class CachingInvocationHandler implements InvocationHandler {
 			String cacheRegion = targetMethod.getAnnotation(Cacheable.class)
 					.cacheRegion();
 			String key = getkey(method, args);
-			System.out.println("CachingInvocationHandler.invoke()  cacheRegion: "+cacheRegion);
 			retVal = repository.getCacheValue(cacheRegion, key);
 
 			if (retVal == null) {
 				retVal = method.invoke(proxyObj, args);
 				repository.addCacheValue(cacheRegion, key, retVal);
-				System.out.println("FRESH : Key: " + key + "   Val: " + retVal);
+				Logger.log(this, "invoke", "FRESH RESULT for Key: \"" + key + "\" Val: " + retVal);
 			} else {
-				System.out
-						.println("CACHED : Key: " + key + "   Val: " + retVal);
+				Logger.log(this, "invoke","CACHED RESULT for Key: \"" + key + "\" Val: " + retVal);
 			}
 		} else {
 			retVal = method.invoke(proxyObj, args);
@@ -73,7 +72,6 @@ public class CachingInvocationHandler implements InvocationHandler {
 			key.append(constructArgumentString(args[i]));
 		}
 		key.append(")");
-		System.out.println("Key : " + key);
 		return key.toString();
 	}
 
