@@ -5,14 +5,14 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jspring.annotations.Cachable;
+import com.jspring.annotations.Cacheable;
 import com.jspring.util.AnnotationUtil;
 import com.jspring.util.ReflectionUtil;
 
 public class CachingIncocationHandler implements InvocationHandler {
 
 	private Object actualObj;
-	
+
 	private Object proxyObj;
 
 	private Map<String, Object> map;
@@ -29,8 +29,9 @@ public class CachingIncocationHandler implements InvocationHandler {
 		String key = getKey(method);
 		Object retVal = map.get(key);
 
-		Method m2 = ReflectionUtil.getActualMethod(actualObj.getClass(), method);
-		if (AnnotationUtil.containAnnotation(m2, Cachable.class)) {
+		Method m2 = ReflectionUtil
+				.getActualMethod(actualObj.getClass(), method);
+		if (AnnotationUtil.containAnnotation(m2, Cacheable.class)) {
 			if (retVal == null) {
 				retVal = method.invoke(proxyObj, args);
 				map.put(key, retVal);
@@ -40,8 +41,8 @@ public class CachingIncocationHandler implements InvocationHandler {
 				System.out.println("CACHED : Key: " + getKey(method)
 						+ "   Val: " + retVal);
 			}
-		}else {
-			System.out.println("NEVER CACHED :"+getKey(method));
+		} else {
+			System.out.println("NEVER CACHED :" + getKey(method));
 			retVal = method.invoke(proxyObj, args);
 		}
 
