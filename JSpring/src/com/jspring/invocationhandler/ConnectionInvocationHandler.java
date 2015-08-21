@@ -11,6 +11,8 @@ public class ConnectionInvocationHandler implements InvocationHandler{
 		System.out
 				.println("ConnectionInvocationHandler.ConnectionInvocationHandler()");
 		this.connection = connection;
+		System.out
+				.println("ConnectionInvocationHandler.ConnectionInvocationHandler()-----------000000000000000000-----------");
 	}
 
 	
@@ -18,9 +20,9 @@ public class ConnectionInvocationHandler implements InvocationHandler{
 			throws Throwable {
 		Object retVal = null;
 		System.out.println("ConnectionInvocationHandler.invoke()"+method.getName()+connection);
-		 if( !method.getName().equalsIgnoreCase("close")){
+		// if( !method.getName().equalsIgnoreCase("close")){
 			 retVal = method.invoke(connection, args);
-		 }
+		// }
 		return retVal;
 	}
 }

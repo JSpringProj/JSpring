@@ -7,9 +7,11 @@ import java.util.Map;
 
 public class TransactionHolder {
 
-	public static final int CONNECTION = 1;
+	public static final int ACTUAL_CONNECTION = 1;
+	
+	public static final int PROXY_CONNECTION = 2;
 
-	private double mainTransactionId;
+	private double mainTransactionId = 0;
 
 	private List<Double> transactionIds;
 
@@ -17,16 +19,18 @@ public class TransactionHolder {
 
 	public TransactionHolder() {
 		super();
-		this.mainTransactionId = randomIdGenerator();
 		map = new HashMap<Integer, Object>();
 		transactionIds = new ArrayList<Double>();
 	}
 
+	void init(){
+		this.mainTransactionId = getNextTransactionId();
+	}
 	double getNextTransactionId() {
 		double transationId = 0;
 		do {
 			transationId = randomIdGenerator();
-		} while (!transactionIds.contains(transationId));
+		} while (transactionIds.contains(transationId));
 		transactionIds.add(transationId);
 		return transationId;
 	}
@@ -48,6 +52,7 @@ public class TransactionHolder {
 	}
 
 	void dispose(){
+		mainTransactionId = -1;
 		transactionIds.clear();
 		map.clear();
 	}
