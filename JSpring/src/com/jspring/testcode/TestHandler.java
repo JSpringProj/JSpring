@@ -1,13 +1,12 @@
 package com.jspring.testcode;
 
-import com.jspring.controller.ComponentScanner;
 import com.jspring.controller.JAppContext;
 import com.jspring.controller.JSpringApp;
 
 public class TestHandler {
 	
 	public static void main(String[] args) {
-		JAppContext context = JSpringApp.run(new ComponentScanner("com.jspring"));
+		JAppContext context = JSpringApp.run(TestConfig.class);
 		
 		ITest t = (ITest)context.getBean("t1");
 		System.out.println("TestHandler.main()"+t);

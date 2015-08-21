@@ -8,7 +8,8 @@ import com.jspring.annotations.Bean;
 import com.jspring.annotations.Component;
 import com.jspring.annotations.Configuration;
 
-@Component
+
+//@ComponentScan(packageName="")
 @Configuration
 public class TestConfig {
 	

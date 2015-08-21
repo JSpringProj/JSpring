@@ -18,11 +18,10 @@ import com.jspring.util.AnnotationUtil;
 public class JAppContext {
 
 	private List<Class> componentClasses;
-	
+
 	private List<Class> configClasses;
 
 	private Map<String, ObjectWrapper> beans;
-
 
 	JAppContext(List<Class> componentClasses, List<Class> configClasses) {
 		this.componentClasses = componentClasses;
@@ -36,13 +35,14 @@ public class JAppContext {
 
 	public Object getBean(String beanId) {
 		ObjectWrapper objWrapper = beans.get(beanId);
-		
+
 		return objWrapper == null ? objWrapper : objWrapper.wrappedObject;
 	}
 
-
 	private void createObjects() {
 		for (Class c : componentClasses) {
+			System.out.println("JAppContext.createObjects() names ;;; "
+					+ c.getSimpleName());
 			createObjectAndInsertInMap(c);
 		}
 	}
@@ -50,34 +50,38 @@ public class JAppContext {
 	private void createObjectAndInsertInMap(Class c) {
 		ObjectWrapper objWrapper = null;
 		try {
-				Object actualObj = Class.forName(c.getName()).newInstance();
-				Object wrappedObj = ProxyCreator.getProxy(actualObj);
-				objWrapper = new ObjectWrapper(actualObj, wrappedObj);
+			Object actualObj = Class.forName(c.getName()).newInstance();
+			Object wrappedObj = ProxyCreator.getProxy(actualObj);
+			objWrapper = new ObjectWrapper(actualObj, wrappedObj);
+			insertInMap(c, objWrapper);
 		} catch (Exception e) {
-			System.out.println("JAppContext.createObjects() EXCEPTION");
+			System.out.println("JAppContext.createObjects() EXCEPTION"
+					+ e.getMessage());
 		}
-		insertInMap(c, objWrapper);
 	}
-	
+
 	private void insertInMap(Class c, ObjectWrapper objWrapper) {
 		String beanName = "";
-		 Component component = (Component)c.getAnnotation(Component.class);
-		 String name = component == null ? "" : component.name().trim();
-		 System.out.println("JAppContext.insertInMap() name=["+name+"]");
-		 if( !name.isEmpty()){
-			 beanName = name;
-		 }else if (c.getInterfaces().length > 0) {
-			 beanName = c.getInterfaces()[0].getSimpleName();
-		 }else {
-			 beanName = c.getSimpleName();
-		 }
-		System.out.println("JAppContext.insertInMap() beanName :::: "+beanName);
+		Component component = (Component) c.getAnnotation(Component.class);
+		String name = component == null ? "" : component.name().trim();
+		System.out.println("JAppContext.insertInMap() name=[" + name + "]");
+		if (!name.isEmpty()) {
+			beanName = name;
+		} else if (c.getInterfaces().length > 0) {
+			beanName = c.getInterfaces()[0].getSimpleName();
+		} else {
+			beanName = c.getSimpleName();
+		}
+		System.out.println("JAppContext.insertInMap() beanName :::: "
+				+ beanName);
 		addToMap(beanName, objWrapper);
 	}
-	
-	private void addToMap(String beanName, ObjectWrapper objWrapper){
-		if( beans.containsKey(beanName)){
-			throw new RuntimeException("Duplicate bean name can not be added - beanname : "+beanName);
+
+	private void addToMap(String beanName, ObjectWrapper objWrapper) {
+		if (beans.containsKey(beanName)) {
+			throw new RuntimeException(
+					"Duplicate bean name can not be added - beanname : "
+							+ beanName);
 		}
 		beans.put(beanName, objWrapper);
 	}
@@ -106,7 +110,8 @@ public class JAppContext {
 		private void injectAutowire() {
 			Collection<ObjectWrapper> collection = beans.values();
 			for (ObjectWrapper objWrapper : collection) {
-				if (AnnotationUtil.containAllAnnotation(objWrapper.actualObject.getClass(), Autowired.class)) {
+				if (AnnotationUtil.containAllAnnotation(
+						objWrapper.actualObject.getClass(), Autowired.class)) {
 					injectFields(objWrapper);
 					injectInMethod(objWrapper);
 				}
@@ -125,7 +130,8 @@ public class JAppContext {
 					injectedObj = (injectedObj == null) ? getBean(injectedType)
 							: injectedObj;
 					System.out
-							.println("JAppContext.AutowireInjector.injectFields()"+injectedType+"    ");
+							.println("JAppContext.AutowireInjector.injectFields()"
+									+ injectedType + "    ");
 					try {
 						f.setAccessible(true);
 						f.set(objWrapper.actualObject, injectedObj);
@@ -173,32 +179,40 @@ public class JAppContext {
 					for (Method m : methods) {
 						if (AnnotationUtil.containAnnotation(m, Bean.class)) {
 							System.out
-									.println("JAppContext.ConfigBeanCreater.createBean() c.getSimpleName() ;"+c.getSimpleName());
+									.println("JAppContext.ConfigBeanCreater.createBean() c.getSimpleName() ;"
+											+ c.getSimpleName());
 							try {
 								System.out
-										.println("JAppContext.ConfigBeanCreater.createBean() getBean(c.getSimpleName() ::"+getBean(c.getSimpleName() ));
-								Object obj = m.invoke(
-										getBean(c.getSimpleName()),
+										.println("JAppContext.ConfigBeanCreater.createBean() getBean(c.getSimpleName() ::"
+												+ getBean(c.getSimpleName()));
+								Object obj = m.invoke(getInstance(c),
 										m.getParameters());
 								System.out
-										.println("JAppContext.ConfigBeanCreater.createBean() obj=="+obj);
-								
+										.println("JAppContext.ConfigBeanCreater.createBean() obj=="
+												+ obj);
+
 								String beanName = "";
-								 Bean bean = (Bean)m.getAnnotation(Bean.class);
-								 System.out
-										.println("JAppContext.ConfigBeanCreater.createBean() bean: "+bean);
-								 String name = bean.name().trim();
-								 if( !name.isEmpty()){
-									 beanName = name;
-								 }else{
-									 beanName = m.getReturnType().getSimpleName();
-								 }
-								 addToMap(beanName, new ObjectWrapper(obj, obj));
+								Bean bean = (Bean) m.getAnnotation(Bean.class);
 								System.out
-								.println(" obj--------------==========="+obj+"   beanName :  "+beanName);
+										.println("JAppContext.ConfigBeanCreater.createBean() bean: "
+												+ bean);
+								String name = bean.name().trim();
+								if (!name.isEmpty()) {
+									beanName = name;
+								} else {
+									beanName = m.getReturnType()
+											.getSimpleName();
+								}
+								addToMap(beanName, new ObjectWrapper(obj, obj));
+								System.out
+										.println(" obj--------------==========="
+												+ obj
+												+ "   beanName :  "
+												+ beanName);
 							} catch (Exception e) {
 								System.out
-										.println("JAppContext.ConfigBeanCreater.createBean() --------"+e.getMessage());
+										.println("JAppContext.ConfigBeanCreater.createBean() --------"
+												+ e.getMessage());
 							}
 						}
 					}
@@ -206,17 +220,27 @@ public class JAppContext {
 			}
 		}
 
+		private Object getInstance(Class c) {
+			try {
+				return Class.forName(c.getName()).newInstance();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
 	}
-	
+
 	private class ObjectWrapper {
 		private Object actualObject;
 		private Object wrappedObject;
+
 		public ObjectWrapper(Object actualObject, Object wrappedObject) {
 			super();
 			this.actualObject = actualObject;
 			this.wrappedObject = wrappedObject;
 		}
-		
+
 	}
 
 }

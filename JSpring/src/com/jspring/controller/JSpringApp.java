@@ -45,6 +45,7 @@ public final class JSpringApp {
 		}
 
 		componeteClasses.addAll(clientComponeteClasses);
+		System.out.println("JSpringApp.run() FILES SCANNED :"+componeteClasses.size());
 		appContext = new JAppContext(componeteClasses, configCls);
 		return appContext;
 	}
