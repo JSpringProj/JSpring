@@ -8,6 +8,7 @@ import com.jspring.controller.JAppContext;
 import com.jspring.controller.JSpringApp;
 import com.jspring.repository.intf.TransactionalRepositry;
 import com.jspring.util.AnnotationUtil;
+import com.jspring.util.Logger;
 import com.jspring.util.ReflectionUtil;
 
 public class TransactionalInvocationHandler implements InvocationHandler {
@@ -28,11 +29,10 @@ public class TransactionalInvocationHandler implements InvocationHandler {
 			TransactionalRepositry rep = (TransactionalRepositry)appCon.getBean("TransactionalRepositry");
 			double d = rep.startTransaction();
 			rep.getConnection();
-			System.out.println("TransactionalInvocationHandler.invoke()"+d);
-			System.out.println(" Started Transaction");
+			Logger.log(this, "invoke", " Started transaction with transaction id : "+d);
 			retVal = method.invoke(proxyObj, args);
 			rep.commit(d);
-			System.out.println("Transaction completed");		
+			Logger.log(this, "invoke", " Commited transaction with transaction id : "+d);
 		}else{
 			retVal = method.invoke(proxyObj, args);
 		}

@@ -5,7 +5,6 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import com.jspring.annotations.Bean;
-import com.jspring.annotations.Component;
 import com.jspring.annotations.Configuration;
 
 
@@ -25,5 +24,18 @@ public class TestConfig {
 		dataSource.setPassword("6432");
 		return dataSource;
 	}
+	
+	/*@Bean
+	public TransactionalRepositry getTransactionalRepositry(){
+		TransactionalRepositry rep = new TransactionalRepositryImpl();
+		DataSource ds = (DataSource)JSpringApp.getAppContext().getBean("DataSource");
+		rep.setDataSource(ds);
+		return rep;
+	}
+	
+	@Bean CacheRepository getCacheRepository(){
+		CacheRepository cacherep = new CacheRepositoryImpl();
+		return cacherep;
+	}*/
 
 }

@@ -4,25 +4,23 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 
+import com.jspring.util.Logger;
+
 public class ConnectionInvocationHandler implements InvocationHandler{
 
 	private Connection connection;
 	public ConnectionInvocationHandler(Connection connection){
-		System.out
-				.println("ConnectionInvocationHandler.ConnectionInvocationHandler()");
 		this.connection = connection;
-		System.out
-				.println("ConnectionInvocationHandler.ConnectionInvocationHandler()-----------000000000000000000-----------");
 	}
 
 	
 	public Object invoke(Object proxy, Method method, Object[] args)
 			throws Throwable {
 		Object retVal = null;
-		System.out.println("ConnectionInvocationHandler.invoke()"+method.getName()+connection);
-		// if( !method.getName().equalsIgnoreCase("close")){
+		 if( !method.getName().equalsIgnoreCase("close")){
+			 Logger.log(this, "invoke", "Can not close connection ");
 			 retVal = method.invoke(connection, args);
-		// }
+		 }
 		return retVal;
 	}
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import com.jspring.annotations.ComponentScan;
 import com.jspring.annotations.Configuration;
 import com.jspring.util.AnnotationUtil;
+import com.jspring.util.Logger;
 
 public final class JSpringApp {
 
@@ -45,7 +46,7 @@ public final class JSpringApp {
 		}
 
 		componeteClasses.addAll(clientComponeteClasses);
-		System.out.println("JSpringApp.run() FILES SCANNED :"+componeteClasses.size());
+		Logger.log(JSpringApp.class, "run", "FILES SCANNED : "+ componeteClasses.size());
 		appContext = new JAppContext(componeteClasses, configCls);
 		return appContext;
 	}

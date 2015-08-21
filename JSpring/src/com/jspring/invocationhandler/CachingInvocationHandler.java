@@ -27,7 +27,7 @@ public class CachingInvocationHandler implements InvocationHandler {
 				actualObj.getClass(), method);
 		JAppContext appCon = JSpringApp.getAppContext();
 		CacheRepository repository = (CacheRepository) appCon
-				.getBean("CacheRepositoryImpl");
+				.getBean("CacheRepository");
 		Object retVal;
 
 		if (AnnotationUtil.containAnnotation(targetMethod, CacheEvict.class)) {

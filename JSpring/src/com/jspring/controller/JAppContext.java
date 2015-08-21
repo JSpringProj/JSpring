@@ -14,6 +14,7 @@ import com.jspring.annotations.Component;
 import com.jspring.annotations.Configuration;
 import com.jspring.annotations.PostConstruct;
 import com.jspring.util.AnnotationUtil;
+import com.jspring.util.Logger;
 
 public class JAppContext {
 
@@ -41,8 +42,6 @@ public class JAppContext {
 
 	private void createObjects() {
 		for (Class c : componentClasses) {
-			System.out.println("JAppContext.createObjects() names ;;; "
-					+ c.getSimpleName());
 			createObjectAndInsertInMap(c);
 		}
 	}
@@ -55,8 +54,8 @@ public class JAppContext {
 			objWrapper = new ObjectWrapper(actualObj, wrappedObj);
 			insertInMap(c, objWrapper);
 		} catch (Exception e) {
-			System.out.println("JAppContext.createObjects() EXCEPTION"
-					+ e.getMessage());
+			Logger.log(this, "createObjectAndInsertInMap",
+					"Exception in creating bean for " + c.getSimpleName());
 		}
 	}
 
@@ -64,7 +63,6 @@ public class JAppContext {
 		String beanName = "";
 		Component component = (Component) c.getAnnotation(Component.class);
 		String name = component == null ? "" : component.name().trim();
-		System.out.println("JAppContext.insertInMap() name=[" + name + "]");
 		if (!name.isEmpty()) {
 			beanName = name;
 		} else if (c.getInterfaces().length > 0) {
@@ -72,9 +70,9 @@ public class JAppContext {
 		} else {
 			beanName = c.getSimpleName();
 		}
-		System.out.println("JAppContext.insertInMap() beanName :::: "
-				+ beanName);
 		addToMap(beanName, objWrapper);
+		Logger.log(this, "insertInMap", "Bean created with name :" + beanName
+				+ " Object :" + objWrapper);
 	}
 
 	private void addToMap(String beanName, ObjectWrapper objWrapper) {
@@ -129,9 +127,6 @@ public class JAppContext {
 					Object injectedObj = getBean(injectedAnnotationType);
 					injectedObj = (injectedObj == null) ? getBean(injectedType)
 							: injectedObj;
-					System.out
-							.println("JAppContext.AutowireInjector.injectFields()"
-									+ injectedType + "    ");
 					try {
 						f.setAccessible(true);
 						f.set(objWrapper.actualObject, injectedObj);
@@ -178,24 +173,11 @@ public class JAppContext {
 					Method[] methods = c.getDeclaredMethods();
 					for (Method m : methods) {
 						if (AnnotationUtil.containAnnotation(m, Bean.class)) {
-							System.out
-									.println("JAppContext.ConfigBeanCreater.createBean() c.getSimpleName() ;"
-											+ c.getSimpleName());
 							try {
-								System.out
-										.println("JAppContext.ConfigBeanCreater.createBean() getBean(c.getSimpleName() ::"
-												+ getBean(c.getSimpleName()));
 								Object obj = m.invoke(getInstance(c),
 										m.getParameters());
-								System.out
-										.println("JAppContext.ConfigBeanCreater.createBean() obj=="
-												+ obj);
-
 								String beanName = "";
 								Bean bean = (Bean) m.getAnnotation(Bean.class);
-								System.out
-										.println("JAppContext.ConfigBeanCreater.createBean() bean: "
-												+ bean);
 								String name = bean.name().trim();
 								if (!name.isEmpty()) {
 									beanName = name;
@@ -203,16 +185,16 @@ public class JAppContext {
 									beanName = m.getReturnType()
 											.getSimpleName();
 								}
-								addToMap(beanName, new ObjectWrapper(obj, obj));
-								System.out
-										.println(" obj--------------==========="
-												+ obj
-												+ "   beanName :  "
-												+ beanName);
+								ObjectWrapper objWrapper = new ObjectWrapper(
+										obj, obj);
+								addToMap(beanName, objWrapper);
+
+								Logger.log(this, "ConfigBeanCreater",
+										"Bean created with name :" + beanName
+												+ " Object :" + objWrapper);
 							} catch (Exception e) {
-								System.out
-										.println("JAppContext.ConfigBeanCreater.createBean() --------"
-												+ e.getMessage());
+								Logger.log(this, "ConfigBeanCreater",
+										"Exception while creating bean with message : "+e.getMessage());
 							}
 						}
 					}
@@ -241,6 +223,10 @@ public class JAppContext {
 			this.wrappedObject = wrappedObject;
 		}
 
+		public String toString() {
+			return "Actual Object : " + actualObject + ",  Wrapper Object : "
+					+ wrappedObject;
+		}
 	}
 
 }

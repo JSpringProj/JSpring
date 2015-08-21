@@ -10,6 +10,7 @@ import com.jspring.annotations.Autowired;
 import com.jspring.annotations.Component;
 import com.jspring.invocationhandler.ConnectionInvocationHandler;
 import com.jspring.repository.intf.TransactionalRepositry;
+import com.jspring.util.Logger;
 
 @Component
 public class TransactionalRepositryImpl implements TransactionalRepositry {
@@ -34,10 +35,10 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 				dataSource.getConnection().setAutoCommit(false);
 			} catch (SQLException e) {
 			}
-
 		} else {
 			transactionId = holder.getNextTransactionId();
 		}
+		Logger.log(this, "startTransaction", " Started Transaction with id : "+transactionId);
 		return transactionId;
 	}
 
@@ -45,22 +46,17 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 	public boolean commit(double transactionId) {
 		TransactionHolder holder = getHolder();
 		double mainTId = holder.getMainTransactionId();
-		System.out.println("TransactionalRepositryImpl.commit() before"+transactionId+ "   "+mainTId +"   "+Double.compare(mainTId ,transactionId));
 		if (Double.compare(mainTId ,transactionId) == 0) {
 			try {
 				Connection connection = (Connection) holder
 						.getValue(TransactionHolder.ACTUAL_CONNECTION);
-				System.out.println("TransactionalRepositryImpl.commit()"+transactionId+connection);
 				connection.commit();
-				System.out.println("TransactionalRepositryImpl.commit() 0-0-0-0-0-");
 				connection.close();
-				System.out.println("TransactionalRepositryImpl.commit() -------------");
 				disposeHolder();
-				
+				Logger.log(this, "commit", " Commited with id : "+transactionId);
 			} catch (SQLException e) {
 			}
 		} else {
-			System.out.println("TransactionalRepositryImpl.commit() NOT EQ");
 			return holder.removeTranstaionId(transactionId);
 		}
 		return true;
@@ -77,7 +73,7 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 				connection.rollback();
 				connection.close();
 				disposeHolder();
-				System.out.println("TransactionalRepositryImpl.rollback()"+transactionId);
+				Logger.log(this, "rollback", " Rollbacked with id : "+transactionId);
 			} catch (SQLException e) {
 			}
 		} else {
@@ -102,9 +98,6 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 			}
 
 		}
-		System.out
-				.println("********************8TransactionalRepositryImpl.getConnection()"
-						+ con);
 		return con;
 	}
 
