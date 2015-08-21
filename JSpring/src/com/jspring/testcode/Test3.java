@@ -7,8 +7,9 @@ import com.jspring.annotations.Component;
 public class Test3 implements ITest {
 
 	@Override
-	public void t1() {
+	public String t1() {
 		System.out.println("PRINT FROM:  Test3.t1()");
+		return "T####3";
 	}
 
 	@Override

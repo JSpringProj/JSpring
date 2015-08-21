@@ -30,6 +30,7 @@ public class CacheRepositoryImpl implements CacheRepository {
 		Map<String, Object> regionValueMap = regionMap.get(cacheRegion);
 		if (regionValueMap == null) {
 			regionValueMap = new HashMap<String, Object>();
+			regionMap.put(cacheRegion, regionValueMap);
 		}
 		regionValueMap.put(key, value);
 	}

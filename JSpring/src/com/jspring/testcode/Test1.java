@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.jspring.annotations.Cacheable;
 import com.jspring.annotations.Component;
 import com.jspring.annotations.Transational;
 import com.jspring.controller.JAppContext;
@@ -13,9 +14,10 @@ import com.jspring.repository.intf.TransactionalRepositry;
 
 @Component(name="t1")
 public class Test1 implements ITest {
-
-	public void t1(){
+	@Cacheable
+	public String t1(){
 		System.out.println("PRINT FROM:  Test1.t1()");
+		return "T!!!1";
 	}
 	@Transational
 	public void t2(){

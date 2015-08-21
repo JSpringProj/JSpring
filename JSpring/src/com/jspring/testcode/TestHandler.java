@@ -10,8 +10,9 @@ public class TestHandler {
 		
 		ITest t = (ITest)context.getBean("t1");
 		System.out.println("TestHandler.main()"+t);
-		//t.t3();
-		t.t3();
+		System.out.println(t.t1());
+		System.out.println(t.t1());
+		System.out.println(t.t1());
 		//t.t3();
 	}
 

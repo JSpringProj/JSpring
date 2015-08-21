@@ -28,10 +28,10 @@ public class CachingInvocationHandler implements InvocationHandler {
 		JAppContext appCon = JSpringApp.getAppContext();
 		CacheRepository repository = (CacheRepository) appCon
 				.getBean("CacheRepository");
-		Object retVal;
+		Object retVal = null;
 
 		if (AnnotationUtil.containAnnotation(targetMethod, CacheEvict.class)) {
-			String cacheRegion = targetMethod.getAnnotation(Cacheable.class)
+			String cacheRegion = targetMethod.getAnnotation(CacheEvict.class)
 					.cacheRegion();
 			repository.evictCache(cacheRegion);
 		}
@@ -40,6 +40,7 @@ public class CachingInvocationHandler implements InvocationHandler {
 			String cacheRegion = targetMethod.getAnnotation(Cacheable.class)
 					.cacheRegion();
 			String key = getkey(method, args);
+			System.out.println("CachingInvocationHandler.invoke()  cacheRegion: "+cacheRegion);
 			retVal = repository.getCacheValue(cacheRegion, key);
 
 			if (retVal == null) {
