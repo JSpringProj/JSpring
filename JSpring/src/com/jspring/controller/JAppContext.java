@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.jspring.annotations.Autowired;
+import com.jspring.annotations.Bean;
+import com.jspring.annotations.Configuration;
+import com.jspring.annotations.PostConstruct;
 import com.jspring.util.AnnotationUtil;
 
 public class JAppContext {
@@ -23,7 +26,9 @@ public class JAppContext {
 		beans = new HashMap<String, Object>();
 		tempIntfaceBeans = new HashMap<String, Object>();
 		createObjects();
+		new ConfigBeanCreater().createBean();
 		new AutowireInjector().injectAutowire();
+		new PostConstructCaller();
 	}
 
 	public Object getBean(String beanId) {
@@ -36,24 +41,54 @@ public class JAppContext {
 
 	private void createObjects() {
 		for (Class c : compClasses) {
-			String className = c.getSimpleName();
-			String interfaceName = null;
-			if (c.getInterfaces().length > 0) {
-				interfaceName = c.getInterfaces()[0].getSimpleName();
+			createObjectAndInsertInMap(c);
+		}
+	}
+
+	private void createObjectAndInsertInMap(Class c) {
+		try {
+			Object obj = ProxyCreator.getProxy(c);
+			if (obj == null) {
+				obj = Class.forName(c.getName()).newInstance();
+				System.out.println("No proxy created for "
+						+ obj.getClass().getName());
 			}
-			try {
-				Object obj = ProxyCreator.getProxy(c);
-				if (obj == null) {
-					obj = Class.forName(c.getName()).newInstance();
-					System.out.println("No proxy created for "
-							+ obj.getClass().getName());
+			insertInMap(c, obj);
+		} catch (Exception e) {
+			System.out.println("JAppContext.createObjects() EXCEPTION");
+		}
+	}
+	
+	private void insertInMap(Class c, Object obj) {
+		String className = c.getSimpleName();
+		String interfaceName = null;
+		if (c.getInterfaces().length > 0) {
+			interfaceName = c.getInterfaces()[0].getSimpleName();
+		}
+		if (interfaceName != null) {
+			tempIntfaceBeans.put(interfaceName, obj);
+		}
+		System.out.println("JAppContext.insertInMap() className :::: "+className+"    "+interfaceName);
+		beans.put(className, obj);
+	}
+
+	private class PostConstructCaller {
+
+		PostConstructCaller() {
+			for (Class c : compClasses) {
+				if (AnnotationUtil.containAllAnnotation(c, PostConstruct.class)) {
+					Method[] methods = c.getDeclaredMethods();
+					for (Method m : methods) {
+						if (AnnotationUtil.containAnnotation(m,
+								PostConstruct.class)) {
+							try {
+								m.invoke(getBean(c.getSimpleName()),
+										m.getParameters());
+							} catch (Exception e) {
+							}
+						}
+					}
 				}
-				if (interfaceName != null) {
-					tempIntfaceBeans.put(interfaceName, obj);
-				}
-				beans.put(className, obj);
-			} catch (Exception e) {
-				System.out.println("JAppContext.createObjects() EXCEPTION");
 			}
 		}
 	}
@@ -119,6 +154,33 @@ public class JAppContext {
 			}
 
 		}
+	}
+
+	private class ConfigBeanCreater {
+		private void createBean() {
+			for (Class c : compClasses) {
+				if (AnnotationUtil.containAnnotation(c, Configuration.class)) {
+					Method[] methods = c.getDeclaredMethods();
+					for (Method m : methods) {
+						if (AnnotationUtil.containAnnotation(m, Bean.class)) {
+							try {
+								Object obj = m.invoke(
+										getBean(c.getSimpleName()),
+										m.getParameters());
+								String interfaceName = m.getReturnType().getSimpleName();
+								tempIntfaceBeans.put(interfaceName, obj);
+								String id = m.getName();
+								beans.put(id, obj);
+								System.out
+								.println(" obj--------------==========="+obj+"   iName: "+m.getReturnType().getSimpleName()+"   "+m.getName()+ "id : "+id);
+							} catch (Exception e) {
+							}
+						}
+					}
+				}
+			}
+		}
+
 	}
 
 }

@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 
 import com.jspring.annotations.Autowired;
 import com.jspring.annotations.Component;
+import com.jspring.annotations.PostConstruct;
 import com.jspring.invocationhandler.ConnectionInvocationHandler;
 import com.jspring.repository.intf.TransactionalRepositry;
 
@@ -22,14 +23,24 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 
 	public TransactionalRepositryImpl() {
 		threadLocal = new ThreadLocal<TransactionHolder>();
+	}
+	
+	@PostConstruct
+	public void testPostCon(){
+		System.out.println("TransactionalRepositryImpl.testPostCon() --------------------");
 		try {
+			System.out
+					.println("TransactionalRepositryImpl.TransactionalRepositryImpl()------------dataSource: "+dataSource);
+			Connection con = dataSource.getConnection();
+			System.out
+					.println("TransactionalRepositryImpl.TransactionalRepositryImpl() con:  "+con);
 			connection = (Connection) Proxy
 					.newProxyInstance(
-							Connection.class.getClassLoader(),
-							new Class[]{Connection.class},
+							con.getClass().getClassLoader(),
+							con.getClass().getInterfaces(),
 							new ConnectionInvocationHandler(dataSource
 									.getConnection()));
-			
+
 		} catch (Exception e) {
 			System.out
 					.println("TransactionalRepositryImpl.TransactionalRepositryImpl() EXP");
@@ -40,15 +51,18 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 	public double startTransaction() {
 		double transactionId = 0;
 		TransactionHolder holder = threadLocal.get();
-		System.out.println("TransactionalRepositryImpl.startTransaction()"+holder);
+		System.out.println("TransactionalRepositryImpl.startTransaction()"
+				+ holder);
 		if (holder == null) {
 			holder = getHolder();
 			transactionId = holder.getMainTransactionId();
-			System.out.println("TransactionalRepositryImpl.startTransaction() dataSource : "+dataSource);
-			/*try {
-				dataSource.getConnection().setAutoCommit(false);
-			} catch (SQLException e) {
-			}*/
+			System.out
+					.println("TransactionalRepositryImpl.startTransaction() dataSource : "
+							+ dataSource);
+			/*
+			 * try { dataSource.getConnection().setAutoCommit(false); } catch
+			 * (SQLException e) { }
+			 */
 		} else {
 			transactionId = holder.getNextTransactionId();
 		}
@@ -58,15 +72,17 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 	@Override
 	public boolean commit(double transactionId) {
 		TransactionHolder holder = getHolder();
-		System.out.println("TransactionalRepositryImpl.commit() holder="+holder);
+		System.out.println("TransactionalRepositryImpl.commit() holder="
+				+ holder);
 		double mainTId = holder.getMainTransactionId();
-		System.out.println("TransactionalRepositryImpl.commit() mainTId="+mainTId);
+		System.out.println("TransactionalRepositryImpl.commit() mainTId="
+				+ mainTId);
 		if (mainTId == transactionId) {
-			//try {
-				//dataSource.getConnection().commit();
-				disposeHolder();
-			//} catch (SQLException e) {
-			//}
+			// try {
+			// dataSource.getConnection().commit();
+			disposeHolder();
+			// } catch (SQLException e) {
+			// }
 		} else {
 			return holder.removeTranstaionId(transactionId);
 		}
@@ -98,7 +114,7 @@ public class TransactionalRepositryImpl implements TransactionalRepositry {
 			holder.setValue(TransactionHolder.CONNECTION, connection);
 			con = connection;
 		}
-		System.out.println("TransactionalRepositryImpl.getConnection()"+con);
+		System.out.println("TransactionalRepositryImpl.getConnection()" + con);
 		return con;
 	}
 
