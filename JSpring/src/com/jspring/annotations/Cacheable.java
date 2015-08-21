@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Cachable {
+public @interface Cacheable {
 
-	
+	String cacheRegion() default "default";
 }
