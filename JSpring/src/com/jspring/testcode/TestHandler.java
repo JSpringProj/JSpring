@@ -13,7 +13,7 @@ public class TestHandler {
 		System.out.println(t.t1());
 		System.out.println(t.t1());
 		System.out.println(t.t1());
-		//t.t3();
+		t.t3();
 	}
 
 }

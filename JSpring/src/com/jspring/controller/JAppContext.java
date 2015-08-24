@@ -8,11 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.cglib.proxy.Enhancer;
+
 import com.jspring.annotations.Autowired;
 import com.jspring.annotations.Bean;
 import com.jspring.annotations.Component;
 import com.jspring.annotations.Configuration;
 import com.jspring.annotations.PostConstruct;
+import com.jspring.invocationhandler.ConfigInvocationHandler;
 import com.jspring.util.AnnotationUtil;
 import com.jspring.util.Logger;
 
@@ -169,11 +172,12 @@ public class JAppContext {
 		private void createBean() {
 			for (Class c : configClasses) {
 				if (AnnotationUtil.containAnnotation(c, Configuration.class)) {
+					Object proxyObj = Enhancer.create(c, new ConfigInvocationHandler());
 					Method[] methods = c.getDeclaredMethods();
 					for (Method m : methods) {
 						if (AnnotationUtil.containAnnotation(m, Bean.class)) {
 							try {
-								Object obj = m.invoke(getInstance(c),
+								Object obj = m.invoke(proxyObj,
 										m.getParameters());
 								String beanName = "";
 								Bean bean = (Bean) m.getAnnotation(Bean.class);
@@ -188,11 +192,11 @@ public class JAppContext {
 										obj, obj);
 								addToMap(beanName, objWrapper);
 
-								Logger.log(this, "ConfigBeanCreater",
+								Logger.log(this, "createBean",
 										"Bean created with name :" + beanName
 												+ " Object :" + objWrapper);
 							} catch (Exception e) {
-								Logger.log(this, "ConfigBeanCreater",
+								Logger.log(this, "createBean",
 										"Exception while creating bean with message : "+e.getMessage());
 							}
 						}

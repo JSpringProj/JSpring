@@ -6,21 +6,18 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import com.jspring.annotations.Autowired;
-import com.jspring.annotations.Component;
 import com.jspring.invocationhandler.ConnectionInvocationHandler;
 import com.jspring.repository.intf.TransactionalRepositry;
 import com.jspring.util.Logger;
 
-@Component
 public class TransactionalRepositryImpl implements TransactionalRepositry {
 
 	private final ThreadLocal<TransactionHolder> threadLocal;
 	
-	@Autowired
 	private DataSource dataSource;
 
-	public TransactionalRepositryImpl() {
+	public TransactionalRepositryImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
 		threadLocal = new ThreadLocal<TransactionHolder>();
 	}
 

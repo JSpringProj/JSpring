@@ -6,6 +6,11 @@ import org.apache.commons.dbcp.BasicDataSource;
 
 import com.jspring.annotations.Bean;
 import com.jspring.annotations.Configuration;
+import com.jspring.controller.JSpringApp;
+import com.jspring.repository.impl.CacheRepositoryImpl;
+import com.jspring.repository.impl.TransactionalRepositryImpl;
+import com.jspring.repository.intf.CacheRepository;
+import com.jspring.repository.intf.TransactionalRepositry;
 
 
 //@ComponentScan(packageName="")
@@ -25,17 +30,15 @@ public class TestConfig {
 		return dataSource;
 	}
 	
-	/*@Bean
+	@Bean
 	public TransactionalRepositry getTransactionalRepositry(){
-		TransactionalRepositry rep = new TransactionalRepositryImpl();
-		DataSource ds = (DataSource)JSpringApp.getAppContext().getBean("DataSource");
-		rep.setDataSource(ds);
+		TransactionalRepositry rep = new TransactionalRepositryImpl(getDataSource());
 		return rep;
 	}
 	
-	@Bean CacheRepository getCacheRepository(){
+	@Bean public CacheRepository getCacheRepository(){
 		CacheRepository cacherep = new CacheRepositoryImpl();
 		return cacherep;
-	}*/
+	}
 
 }

@@ -3,10 +3,8 @@ package com.jspring.repository.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jspring.annotations.Component;
 import com.jspring.repository.intf.CacheRepository;
 
-@Component
 public class CacheRepositoryImpl implements CacheRepository {
 
 	private final Map<String, Map<String, Object>> regionMap;
