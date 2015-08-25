@@ -8,7 +8,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import com.jspring.invocationhandler.ConnectionInvocationHandler;
 import com.jspring.repository.intf.TransactionalRepositry;
 import com.jspring.util.Logger;
 
